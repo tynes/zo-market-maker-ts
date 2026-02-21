@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
+/// User profile containing account IDs and active sessions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
@@ -9,12 +10,14 @@ pub struct User {
     pub sessions: HashMap<String, UserSession>,
 }
 
+/// An active authentication session for a user.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserSession {
     pub pubkey: String,
     pub expiry: String,
 }
 
+/// Solana SPL token metadata used for deposit/withdrawal operations.
 #[derive(Debug, Clone)]
 pub struct SPLTokenInfo {
     pub mint: String,

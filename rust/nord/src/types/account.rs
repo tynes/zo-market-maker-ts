@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use super::enums::{FillMode, Side, PlacementOrigin, FinalizationReason};
+use super::enums::{FillMode, FinalizationReason, PlacementOrigin, Side};
 
+/// Full account state snapshot including orders, positions, balances, and margins.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
@@ -12,6 +13,7 @@ pub struct Account {
     pub margins: AccountMarginsView,
 }
 
+/// An open order on the orderbook.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OpenOrder {
@@ -24,6 +26,7 @@ pub struct OpenOrder {
     pub client_order_id: Option<u64>,
 }
 
+/// Summary of an account's position in a single market.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PositionSummary {
@@ -33,6 +36,7 @@ pub struct PositionSummary {
     pub action_id: u64,
 }
 
+/// Details of a perpetual futures position.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PerpPosition {
@@ -44,6 +48,7 @@ pub struct PerpPosition {
     pub is_long: bool,
 }
 
+/// Token balance for an account.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Balance {
@@ -52,6 +57,7 @@ pub struct Balance {
     pub amount: f64,
 }
 
+/// Margin factors and portfolio values for an account.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountMarginsView {
     pub omf: f64,
@@ -64,6 +70,7 @@ pub struct AccountMarginsView {
     pub bankruptcy: bool,
 }
 
+/// Detailed information about an order, including its lifecycle state.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderInfo {

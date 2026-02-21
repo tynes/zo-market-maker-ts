@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+/// Errors that can occur when interacting with the Nord exchange.
 #[derive(Error, Debug)]
 pub enum NordError {
     #[error("HTTP error {status}: {message}")]
@@ -41,9 +42,13 @@ pub enum NordError {
     #[error("validation error: {0}")]
     Validation(String),
 
+    #[error("overflow: {0}")]
+    Overflow(String),
+
     #[cfg(feature = "solana")]
     #[error("solana error: {0}")]
     Solana(String),
 }
 
+/// Convenience type alias for `Result<T, NordError>`.
 pub type Result<T> = std::result::Result<T, NordError>;

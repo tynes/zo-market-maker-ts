@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::proto::nord;
 
+/// Order side: ask (sell) or bid (buy).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Side {
@@ -27,6 +28,7 @@ impl From<nord::Side> for Side {
     }
 }
 
+/// Order fill mode controlling execution behavior.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FillMode {
     Limit,
@@ -36,6 +38,7 @@ pub enum FillMode {
 }
 
 impl FillMode {
+    /// Convert to the protobuf `FillMode` representation.
     pub fn to_proto(self) -> nord::FillMode {
         match self {
             FillMode::Limit => nord::FillMode::Limit,
@@ -57,6 +60,7 @@ impl From<nord::FillMode> for FillMode {
     }
 }
 
+/// Trigger order type: stop-loss or take-profit.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TriggerKind {
@@ -65,6 +69,7 @@ pub enum TriggerKind {
 }
 
 impl TriggerKind {
+    /// Convert to the protobuf `TriggerKind` representation.
     pub fn to_proto(self) -> nord::TriggerKind {
         match self {
             TriggerKind::StopLoss => nord::TriggerKind::StopLoss,
@@ -73,6 +78,7 @@ impl TriggerKind {
     }
 }
 
+/// Current status of a trigger order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TriggerStatus {
     Active,
@@ -81,6 +87,7 @@ pub enum TriggerStatus {
     Canceled,
 }
 
+/// Time resolution for candlestick data.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CandleResolution {
     #[serde(rename = "1")]
@@ -116,6 +123,7 @@ impl std::fmt::Display for CandleResolution {
     }
 }
 
+/// Role in a trade fill: maker or taker.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum FillRole {
@@ -132,6 +140,7 @@ impl std::fmt::Display for FillRole {
     }
 }
 
+/// Access control role for administrative permissions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AclRole {
     FeeManager,
@@ -140,6 +149,7 @@ pub enum AclRole {
 }
 
 impl AclRole {
+    /// Return the bitmask value for this role.
     pub fn mask(self) -> u32 {
         match self {
             AclRole::FeeManager => 1,
@@ -149,6 +159,7 @@ impl AclRole {
     }
 }
 
+/// Origin of an order placement.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PlacementOrigin {
     User,
@@ -156,6 +167,7 @@ pub enum PlacementOrigin {
     Liquidation,
 }
 
+/// Reason an order was finalized (removed from the book).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FinalizationReason {
     Filled,

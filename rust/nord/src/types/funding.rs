@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Funding payment information for an account's position.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountFundingInfo {

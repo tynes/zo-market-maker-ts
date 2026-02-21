@@ -32,9 +32,7 @@ pub async fn create_session(
     let receipt = send_action(http_client, &action, sign_fn).await?;
 
     match receipt.kind {
-        Some(nord::receipt::Kind::CreateSessionResult(r)) => {
-            Ok((receipt.action_id, r.session_id))
-        }
+        Some(nord::receipt::Kind::CreateSessionResult(r)) => Ok((receipt.action_id, r.session_id)),
         Some(nord::receipt::Kind::Err(code)) => Err(NordError::ReceiptError(format!(
             "create session failed: error code {code}"
         ))),

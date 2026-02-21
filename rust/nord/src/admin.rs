@@ -19,11 +19,7 @@ pub struct NordAdmin {
 
 impl NordAdmin {
     /// Create a new admin client.
-    pub fn new(
-        nord: Arc<Nord>,
-        admin_pubkey: [u8; 32],
-        sign_fn: Box<SignFn>,
-    ) -> Self {
+    pub fn new(nord: Arc<Nord>, admin_pubkey: [u8; 32], sign_fn: Box<SignFn>) -> Self {
         Self {
             nord,
             admin_pubkey,
@@ -33,18 +29,14 @@ impl NordAdmin {
     }
 
     fn get_nonce(&self) -> u32 {
-        self.nonce
-            .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+        self.nonce.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
     }
 
     fn acl_pubkey_vec(&self) -> Vec<u8> {
         self.admin_pubkey.to_vec()
     }
 
-    async fn submit_action(
-        &self,
-        kind: nord::action::Kind,
-    ) -> Result<nord::Receipt> {
+    async fn submit_action(&self, kind: nord::action::Kind) -> Result<nord::Receipt> {
         let timestamp = self.nord.get_timestamp().await?;
         let nonce = self.get_nonce();
         let action = create_action(timestamp, nonce, kind);
@@ -136,16 +128,17 @@ impl NordAdmin {
         guardian_set_index: u32,
         addresses: &[String],
     ) -> Result<u64> {
-        let decoded_addresses: Vec<Vec<u8>> =
-            addresses.iter().map(|a| decode_hex(a)).collect();
+        let decoded_addresses: Vec<Vec<u8>> = addresses
+            .iter()
+            .map(|a| decode_hex(a))
+            .collect::<Result<Vec<_>>>()?;
 
-        let kind = nord::action::Kind::PythSetWormholeGuardians(
-            nord::action::PythSetWormholeGuardians {
+        let kind =
+            nord::action::Kind::PythSetWormholeGuardians(nord::action::PythSetWormholeGuardians {
                 guardian_set_index,
                 addresses: decoded_addresses,
                 acl_pubkey: self.acl_pubkey_vec(),
-            },
-        );
+            });
 
         let receipt = self.submit_action(kind).await?;
         Self::extract_action_id(receipt, "pyth_set_wormhole_guardians")
@@ -157,7 +150,7 @@ impl NordAdmin {
         oracle_symbol: &str,
         price_feed_id: &str,
     ) -> Result<u64> {
-        let feed_bytes = decode_hex(price_feed_id);
+        let feed_bytes = decode_hex(price_feed_id)?;
 
         let kind = nord::action::Kind::PythSetSymbolFeed(nord::action::PythSetSymbolFeed {
             oracle_symbol: oracle_symbol.to_string(),
@@ -208,11 +201,7 @@ impl NordAdmin {
     }
 
     /// Add a new fee tier.
-    pub async fn add_fee_tier(
-        &self,
-        maker_fee_ppm: u32,
-        taker_fee_ppm: u32,
-    ) -> Result<u64> {
+    pub async fn add_fee_tier(&self, maker_fee_ppm: u32, taker_fee_ppm: u32) -> Result<u64> {
         let kind = nord::action::Kind::AddFeeTier(nord::action::AddFeeTier {
             acl_pubkey: self.acl_pubkey_vec(),
             config: Some(nord::FeeTierConfig {
@@ -244,11 +233,7 @@ impl NordAdmin {
     }
 
     /// Assign a fee tier to accounts.
-    pub async fn update_accounts_tier(
-        &self,
-        accounts: &[u32],
-        tier_id: u32,
-    ) -> Result<u64> {
+    pub async fn update_accounts_tier(&self, accounts: &[u32], tier_id: u32) -> Result<u64> {
         let kind = nord::action::Kind::UpdateAccountsTier(nord::action::UpdateAccountsTier {
             tier_id,
             accounts: accounts.to_vec(),
@@ -266,7 +251,7 @@ impl NordAdmin {
         amount: Decimal,
     ) -> Result<u64> {
         let token = self.nord.find_token(token_id)?;
-        let amount_wire = to_scaled_u64(amount, token.decimals as u32);
+        let amount_wire = to_scaled_u64(amount, token.decimals as u32)?;
 
         let kind = nord::action::Kind::FeeVaultTransfer(nord::action::FeeVaultTransfer {
             acl_pubkey: self.acl_pubkey_vec(),
@@ -284,9 +269,7 @@ impl NordAdmin {
                 "{op} failed: error code {code}"
             ))),
             Some(_) => Ok(receipt.action_id),
-            None => Err(NordError::ReceiptError(format!(
-                "{op}: empty receipt"
-            ))),
+            None => Err(NordError::ReceiptError(format!("{op}: empty receipt"))),
         }
     }
 }

@@ -81,40 +81,49 @@ impl Nord {
 
     // --- REST delegates ---
 
+    /// Get the current server timestamp.
     pub async fn get_timestamp(&self) -> Result<u64> {
         self.http_client.get_timestamp().await
     }
 
+    /// Get the next action nonce.
     pub async fn get_action_nonce(&self) -> Result<u64> {
         self.http_client.get_action_nonce().await
     }
 
+    /// Get the ID of the most recent action.
     pub async fn get_last_action_id(&self) -> Result<u64> {
         self.http_client.get_last_action_id().await
     }
 
+    /// Get actions in the given ID range.
     pub async fn get_actions(&self, from: u64, to: u64) -> Result<Vec<ActionsItem>> {
         self.http_client.get_actions(from, to).await
     }
 
+    /// Get user information by public key.
     pub async fn get_user(&self, pubkey: &str) -> Result<User> {
         self.http_client.get_user(pubkey).await
     }
 
+    /// Get full account state by account ID.
     pub async fn get_account(&self, account_id: u32) -> Result<Account> {
         self.http_client.get_account(account_id).await
     }
 
+    /// Get the public key associated with an account.
     pub async fn get_account_pubkey(&self, account_id: u32) -> Result<String> {
         self.http_client.get_account_pubkey(account_id).await
     }
 
+    /// Get the withdrawal fee for an account.
     pub async fn get_account_withdrawal_fee(&self, account_id: u32) -> Result<f64> {
         self.http_client
             .get_account_withdrawal_fee(account_id)
             .await
     }
 
+    /// Get paginated order history for an account.
     pub async fn get_account_orders(
         &self,
         account_id: u32,
@@ -126,6 +135,7 @@ impl Nord {
             .await
     }
 
+    /// Get paginated PnL history for an account.
     pub async fn get_account_pnl(
         &self,
         account_id: u32,
@@ -136,14 +146,23 @@ impl Nord {
         page_size: Option<u8>,
     ) -> Result<PageResult<AccountPnlInfo>> {
         self.http_client
-            .get_account_pnl(account_id, market_id, since, until, start_inclusive, page_size)
+            .get_account_pnl(
+                account_id,
+                market_id,
+                since,
+                until,
+                start_inclusive,
+                page_size,
+            )
             .await
     }
 
+    /// Get active triggers for an account.
     pub async fn get_account_triggers(&self, account_id: u32) -> Result<Option<Vec<TriggerInfo>>> {
         self.http_client.get_account_triggers(account_id).await
     }
 
+    /// Get paginated trigger history for an account.
     pub async fn get_account_trigger_history(
         &self,
         account_id: u32,
@@ -157,6 +176,7 @@ impl Nord {
             .await
     }
 
+    /// Get paginated withdrawal history for an account.
     pub async fn get_account_withdrawal_history(
         &self,
         account_id: u32,
@@ -170,23 +190,28 @@ impl Nord {
             .await
     }
 
+    /// Get the orderbook for a market by symbol name.
     pub async fn get_orderbook_by_symbol(&self, symbol: &str) -> Result<OrderbookInfo> {
         let market_id = self.resolve_market_id(symbol)?;
         self.http_client.get_orderbook(market_id).await
     }
 
+    /// Get the orderbook for a market by ID.
     pub async fn get_orderbook(&self, market_id: u32) -> Result<OrderbookInfo> {
         self.http_client.get_orderbook(market_id).await
     }
 
+    /// Get exchange-wide markets and tokens configuration.
     pub async fn get_info(&self) -> Result<MarketsInfo> {
         self.http_client.get_info().await
     }
 
+    /// Get statistics for a specific market.
     pub async fn get_market_stats(&self, market_id: u32) -> Result<MarketStats> {
         self.http_client.get_market_stats(market_id).await
     }
 
+    /// Get the fee rate for a market, role, and account combination.
     pub async fn get_market_fee(
         &self,
         market_id: u32,
@@ -198,14 +223,17 @@ impl Nord {
             .await
     }
 
+    /// Get statistics for a specific token.
     pub async fn get_token_stats(&self, token_id: u32) -> Result<TokenStats> {
         self.http_client.get_token_stats(token_id).await
     }
 
+    /// Get detailed information about a specific order.
     pub async fn get_order(&self, order_id: u64) -> Result<OrderInfo> {
         self.http_client.get_order(order_id).await
     }
 
+    /// Get paginated trades for a specific order.
     pub async fn get_order_trades(
         &self,
         order_id: u64,
@@ -217,6 +245,7 @@ impl Nord {
             .await
     }
 
+    /// Get paginated trades with optional filters.
     #[allow(clippy::too_many_arguments)]
     pub async fn get_trades(
         &self,
@@ -243,14 +272,17 @@ impl Nord {
             .await
     }
 
+    /// Get all fee tier brackets.
     pub async fn get_fee_brackets(&self) -> Result<Vec<(FeeTierId, FeeTierConfig)>> {
         self.http_client.get_fee_brackets().await
     }
 
+    /// Get the fee tier assigned to an account.
     pub async fn get_account_fee_tier(&self, account_id: u32) -> Result<FeeTierId> {
         self.http_client.get_account_fee_tier(account_id).await
     }
 
+    /// Get paginated account-to-fee-tier mappings.
     pub async fn get_accounts_fee_tiers(
         &self,
         tier: Option<FeeTierId>,
@@ -262,10 +294,12 @@ impl Nord {
             .await
     }
 
+    /// Get the list of admin users and their roles.
     pub async fn get_admin_list(&self) -> Result<Vec<AdminInfo>> {
         self.http_client.get_admin_list().await
     }
 
+    /// Get trading volume for an account with optional filters.
     pub async fn get_account_volume(
         &self,
         account_id: u32,
@@ -305,7 +339,9 @@ impl Nord {
 
         let ws_url = format!(
             "{}/ws/{}",
-            self.web_server_url.replace("https://", "wss://").replace("http://", "ws://"),
+            self.web_server_url
+                .replace("https://", "wss://")
+                .replace("http://", "ws://"),
             streams.join("&")
         );
 

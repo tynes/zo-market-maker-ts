@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Detailed information about a liquidation event.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LiquidationInfo {
@@ -31,6 +32,7 @@ pub struct LiquidationInfo {
     pub post_pn: f64,
 }
 
+/// Type of liquidation action taken.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum LiquidationKind {

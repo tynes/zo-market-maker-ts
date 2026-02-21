@@ -1,14 +1,14 @@
-pub mod proto;
-pub mod error;
-pub mod config;
-pub mod types;
-pub mod utils;
-pub mod rest;
 pub mod actions;
-pub mod client;
-pub mod ws;
-pub mod user;
 pub mod admin;
+pub mod client;
+pub mod config;
+pub mod error;
+pub mod proto;
+pub mod rest;
+pub mod types;
+pub mod user;
+pub mod utils;
+pub mod ws;
 
 #[cfg(feature = "solana")]
 pub mod solana;
@@ -16,42 +16,41 @@ pub mod solana;
 // ---- Top-level re-exports for ergonomic usage ----
 
 // Client + user + admin
-pub use client::Nord;
-pub use user::NordUser;
 pub use admin::NordAdmin;
-pub use error::{NordError, Result};
+pub use client::Nord;
 pub use config::NordConfig;
+pub use error::{NordError, Result};
+pub use user::NordUser;
 
 // REST client
 pub use rest::NordHttpClient;
 
 // Core enums
 pub use types::{
-    Side, FillMode, FillRole, TriggerKind, TriggerStatus,
-    CandleResolution, PlacementOrigin, FinalizationReason,
-    AclRole, LiquidationKind,
+    AclRole, CandleResolution, FillMode, FillRole, FinalizationReason, LiquidationKind,
+    PlacementOrigin, Side, TriggerKind, TriggerStatus,
 };
 
 // Market + token info
-pub use types::{MarketsInfo, MarketInfo, TokenInfo};
+pub use types::{MarketInfo, MarketsInfo, TokenInfo};
 
 // Account types
-pub use types::{Account, OpenOrder, PositionSummary, PerpPosition, Balance, AccountMarginsView};
+pub use types::{Account, AccountMarginsView, Balance, OpenOrder, PerpPosition, PositionSummary};
 
 // Orderbook
 pub use types::{OrderbookInfo, SideSummary};
 
 // Trade + order history
-pub use types::{Trade, OrderInfo};
+pub use types::{OrderInfo, Trade};
 
 // Stats
-pub use types::{MarketStats, PerpMarketStats, TokenStats, TokenPrice};
+pub use types::{MarketStats, PerpMarketStats, TokenPrice, TokenStats};
 
 // PnL + funding + volume
-pub use types::{AccountPnlInfo, AccountFundingInfo, AccountVolumeInfo};
+pub use types::{AccountFundingInfo, AccountPnlInfo, AccountVolumeInfo};
 
 // Triggers
-pub use types::{TriggerInfo, Trigger};
+pub use types::{Trigger, TriggerInfo};
 
 // Deposits + withdrawals
 pub use types::{DepositInfo, WithdrawalInfo};
@@ -60,7 +59,7 @@ pub use types::{DepositInfo, WithdrawalInfo};
 pub use types::LiquidationInfo;
 
 // Fees
-pub use types::{FeeTierConfig, AccountFeeTier};
+pub use types::{AccountFeeTier, FeeTierConfig};
 
 // Admin
 pub use types::AdminInfo;
@@ -76,6 +75,6 @@ pub use types::{User, UserSession};
 
 // WebSocket events
 pub use ws::events::{
-    WebSocketMessage, WebSocketTradeUpdate, WebSocketDeltaUpdate,
-    WebSocketAccountUpdate, WebSocketCandleUpdate,
+    WebSocketAccountUpdate, WebSocketCandleUpdate, WebSocketDeltaUpdate, WebSocketMessage,
+    WebSocketTradeUpdate,
 };

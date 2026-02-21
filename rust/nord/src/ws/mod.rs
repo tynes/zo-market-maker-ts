@@ -180,17 +180,13 @@ impl NordWebSocketClient {
         if let Ok(value) = serde_json::from_str::<serde_json::Value>(text) {
             // Wrapped messages: { "trades": ... }, { "delta": ... }, { "account": ... }
             if let Some(trades) = value.get("trades") {
-                if let Ok(update) =
-                    serde_json::from_value::<WebSocketTradeUpdate>(trades.clone())
-                {
+                if let Ok(update) = serde_json::from_value::<WebSocketTradeUpdate>(trades.clone()) {
                     let _ = trade_tx.send(update);
                     return;
                 }
             }
             if let Some(delta) = value.get("delta") {
-                if let Ok(update) =
-                    serde_json::from_value::<WebSocketDeltaUpdate>(delta.clone())
-                {
+                if let Ok(update) = serde_json::from_value::<WebSocketDeltaUpdate>(delta.clone()) {
                     let _ = delta_tx.send(update);
                     return;
                 }
@@ -205,9 +201,7 @@ impl NordWebSocketClient {
             }
             // Candle updates are sent as bare objects with "res" field.
             if value.get("res").is_some() {
-                if let Ok(update) =
-                    serde_json::from_value::<WebSocketCandleUpdate>(value)
-                {
+                if let Ok(update) = serde_json::from_value::<WebSocketCandleUpdate>(value) {
                     let _ = candle_tx.send(update);
                     return;
                 }

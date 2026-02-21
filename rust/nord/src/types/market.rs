@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Exchange-wide markets and tokens configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MarketsInfo {
@@ -7,6 +8,7 @@ pub struct MarketsInfo {
     pub tokens: Vec<TokenInfo>,
 }
 
+/// Configuration for a single perpetual market.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MarketInfo {
@@ -21,6 +23,7 @@ pub struct MarketInfo {
     pub cmf: f64,
 }
 
+/// Configuration for a single token (collateral asset).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TokenInfo {

@@ -13,6 +13,7 @@ pub struct NordHttpClient {
 }
 
 impl NordHttpClient {
+    /// Create a new HTTP client for the given base URL.
     pub fn new(base_url: &str) -> Self {
         Self {
             client: Client::new(),
@@ -21,18 +22,9 @@ impl NordHttpClient {
     }
 
     /// GET a JSON resource.
-    pub async fn get<T: DeserializeOwned>(
-        &self,
-        path: &str,
-        query: &[(&str, &str)],
-    ) -> Result<T> {
+    pub async fn get<T: DeserializeOwned>(&self, path: &str, query: &[(&str, &str)]) -> Result<T> {
         let url = format!("{}{}", self.base_url, path);
-        let resp = self
-            .client
-            .get(&url)
-            .query(query)
-            .send()
-            .await?;
+        let resp = self.client.get(&url).query(query).send().await?;
 
         if !resp.status().is_success() {
             let status = resp.status().as_u16();
@@ -66,7 +58,10 @@ impl NordHttpClient {
             });
         }
 
-        resp.bytes().await.map(|b| b.to_vec()).map_err(NordError::Request)
+        resp.bytes()
+            .await
+            .map(|b| b.to_vec())
+            .map_err(NordError::Request)
     }
 
     /// Get the base URL.

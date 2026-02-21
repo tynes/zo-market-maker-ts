@@ -1,6 +1,6 @@
-pub mod signing;
-pub mod session;
 pub mod atomic;
+pub mod session;
+pub mod signing;
 
 use prost::Message;
 use std::future::Future;
@@ -15,11 +15,7 @@ pub type SignFn =
     dyn Fn(&[u8]) -> Pin<Box<dyn Future<Output = Result<Vec<u8>>> + Send>> + Send + Sync;
 
 /// Create an action with the given timestamp, nonce, and kind.
-pub fn create_action(
-    timestamp: u64,
-    nonce: u32,
-    kind: nord::action::Kind,
-) -> Action {
+pub fn create_action(timestamp: u64, nonce: u32, kind: nord::action::Kind) -> Action {
     Action {
         current_timestamp: timestamp as i64,
         nonce,
@@ -28,10 +24,7 @@ pub fn create_action(
 }
 
 /// Encode action as length-delimited protobuf, sign it, and concatenate.
-pub async fn prepare_action(
-    action: &Action,
-    sign_fn: &SignFn,
-) -> Result<Vec<u8>> {
+pub async fn prepare_action(action: &Action, sign_fn: &SignFn) -> Result<Vec<u8>> {
     let mut raw = Vec::new();
     action
         .encode_length_delimited(&mut raw)
@@ -68,10 +61,7 @@ pub fn format_receipt_error(receipt: &Receipt) -> String {
 }
 
 /// Assert that a receipt contains the expected kind, or return an error.
-pub fn expect_receipt_kind(
-    receipt: &Receipt,
-    expected: &str,
-) -> Result<()> {
+pub fn expect_receipt_kind(receipt: &Receipt, expected: &str) -> Result<()> {
     match &receipt.kind {
         Some(nord::receipt::Kind::Err(code)) => Err(NordError::ReceiptError(format!(
             "Expected {expected}, got error code {code}"
@@ -91,7 +81,12 @@ mod tests {
     fn test_create_action_fields() {
         let timestamp = 1700000000u64;
         let nonce = 42u32;
-        let kind = nord::action::Kind::CancelOrderById(nord::action::CancelOrderById { session_id: 0, order_id: 999, delegator_account_id: None, sender_account_id: None });
+        let kind = nord::action::Kind::CancelOrderById(nord::action::CancelOrderById {
+            session_id: 0,
+            order_id: 999,
+            delegator_account_id: None,
+            sender_account_id: None,
+        });
 
         let action = create_action(timestamp, nonce, kind);
 
@@ -107,7 +102,12 @@ mod tests {
         let action = create_action(
             ts,
             0,
-            nord::action::Kind::CancelOrderById(nord::action::CancelOrderById { session_id: 0, order_id: 1, delegator_account_id: None, sender_account_id: None }),
+            nord::action::Kind::CancelOrderById(nord::action::CancelOrderById {
+                session_id: 0,
+                order_id: 1,
+                delegator_account_id: None,
+                sender_account_id: None,
+            }),
         );
         assert_eq!(action.current_timestamp, ts as i64);
     }
@@ -117,7 +117,12 @@ mod tests {
         let action = create_action(
             0,
             1,
-            nord::action::Kind::CancelOrderById(nord::action::CancelOrderById { session_id: 0, order_id: 12345, delegator_account_id: None, sender_account_id: None }),
+            nord::action::Kind::CancelOrderById(nord::action::CancelOrderById {
+                session_id: 0,
+                order_id: 12345,
+                delegator_account_id: None,
+                sender_account_id: None,
+            }),
         );
 
         match action.kind.unwrap() {
@@ -133,7 +138,12 @@ mod tests {
         let action = create_action(
             1_000_000,
             7,
-            nord::action::Kind::CancelOrderById(nord::action::CancelOrderById { session_id: 0, order_id: 1, delegator_account_id: None, sender_account_id: None }),
+            nord::action::Kind::CancelOrderById(nord::action::CancelOrderById {
+                session_id: 0,
+                order_id: 1,
+                delegator_account_id: None,
+                sender_account_id: None,
+            }),
         );
 
         let mut buf = Vec::new();

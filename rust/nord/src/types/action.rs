@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// A single action record from the action log.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ActionsItem {

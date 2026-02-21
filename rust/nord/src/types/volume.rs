@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Trading volume information for an account in a specific market.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountVolumeInfo {
@@ -8,6 +9,7 @@ pub struct AccountVolumeInfo {
     pub volume_quote: f64,
 }
 
+/// Query parameters for fetching account volume data.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetAccountVolumeQuery {

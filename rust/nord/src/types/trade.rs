@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::enums::Side;
 
+/// A completed trade between a maker and taker.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Trade {

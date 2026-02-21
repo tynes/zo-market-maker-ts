@@ -13,7 +13,7 @@ use crate::client::Nord;
 use crate::error::{NordError, Result};
 use crate::proto::nord;
 use crate::types::*;
-use crate::utils::{to_scaled_u64, to_scaled_u128};
+use crate::utils::{to_scaled_u128, to_scaled_u64};
 
 /// User client for the Nord exchange.
 ///
@@ -37,6 +37,7 @@ pub struct NordUser {
     pub spl_token_infos: Vec<SPLTokenInfo>,
 }
 
+/// A user's token balance within a specific account.
 #[derive(Debug, Clone)]
 pub struct UserBalance {
     pub account_id: u32,
@@ -199,10 +200,7 @@ impl NordUser {
     }
 
     /// Submit a session-signed action.
-    async fn submit_session_action(
-        &self,
-        kind: nord::action::Kind,
-    ) -> Result<nord::Receipt> {
+    async fn submit_session_action(&self, kind: nord::action::Kind) -> Result<nord::Receipt> {
         let _ = self.check_session()?;
         let timestamp = self.nord.get_timestamp().await?;
         let nonce = self.get_nonce();
@@ -225,23 +223,20 @@ impl NordUser {
         client_order_id: Option<u64>,
     ) -> Result<PlaceOrderResult> {
         let session_id = self.check_session()?;
-        let acct = account_id
-            .or_else(|| self.default_account_id().ok());
+        let acct = account_id.or_else(|| self.default_account_id().ok());
 
         let market = self.nord.find_market(market_id)?;
 
         let (wire_price, wire_size) = if let Some(qs) = &quote_size {
-            qs.to_wire(market.price_decimals as u32, market.size_decimals as u32)
+            qs.to_wire(market.price_decimals as u32, market.size_decimals as u32)?
         } else {
-            let p = price.ok_or_else(|| {
-                NordError::Validation("price or quote_size required".into())
-            })?;
-            let s = size.ok_or_else(|| {
-                NordError::Validation("size or quote_size required".into())
-            })?;
+            let p = price
+                .ok_or_else(|| NordError::Validation("price or quote_size required".into()))?;
+            let s =
+                size.ok_or_else(|| NordError::Validation("size or quote_size required".into()))?;
             (
-                to_scaled_u64(p, market.price_decimals as u32),
-                to_scaled_u64(s, market.size_decimals as u32),
+                to_scaled_u64(p, market.price_decimals as u32)?,
+                to_scaled_u64(s, market.size_decimals as u32)?,
             )
         };
 
@@ -250,16 +245,19 @@ impl NordUser {
             Side::Bid => nord::Side::Bid as i32,
         };
 
-        let proto_quote_size = quote_size.as_ref().map(|qs| {
-            let val = to_scaled_u128(
-                qs.value(),
-                market.price_decimals as u32 + market.size_decimals as u32,
-            );
-            nord::U128 {
-                lo: val as u64,
-                hi: (val >> 64) as u64,
-            }
-        });
+        let proto_quote_size = quote_size
+            .as_ref()
+            .map(|qs| {
+                let val = to_scaled_u128(
+                    qs.value(),
+                    market.price_decimals as u32 + market.size_decimals as u32,
+                )?;
+                Ok::<_, NordError>(nord::U128 {
+                    lo: val as u64,
+                    hi: (val >> 64) as u64,
+                })
+            })
+            .transpose()?;
 
         let kind = nord::action::Kind::PlaceOrder(nord::action::PlaceOrder {
             session_id,
@@ -300,8 +298,7 @@ impl NordUser {
         account_id: Option<u32>,
     ) -> Result<CancelOrderResult> {
         let session_id = self.check_session()?;
-        let acct = account_id
-            .or_else(|| self.default_account_id().ok());
+        let acct = account_id.or_else(|| self.default_account_id().ok());
 
         let kind = nord::action::Kind::CancelOrderById(nord::action::CancelOrderById {
             session_id,
@@ -334,16 +331,13 @@ impl NordUser {
         account_id: Option<u32>,
     ) -> Result<CancelOrderResult> {
         let session_id = self.check_session()?;
-        let acct = account_id
-            .or_else(|| self.default_account_id().ok());
+        let acct = account_id.or_else(|| self.default_account_id().ok());
 
-        let kind = nord::action::Kind::CancelOrderByClientId(
-            nord::action::CancelOrderByClientId {
-                session_id,
-                client_order_id,
-                sender_account_id: acct,
-            },
-        );
+        let kind = nord::action::Kind::CancelOrderByClientId(nord::action::CancelOrderByClientId {
+            session_id,
+            client_order_id,
+            sender_account_id: acct,
+        });
 
         let receipt = self.submit_session_action(kind).await?;
 
@@ -434,13 +428,13 @@ impl NordUser {
         account_id: Option<u32>,
     ) -> Result<u64> {
         let session_id = self.check_session()?;
-        let acct = account_id
-            .or_else(|| self.default_account_id().ok());
+        let acct = account_id.or_else(|| self.default_account_id().ok());
 
         let market = self.nord.find_market(market_id)?;
-        let trigger_price_wire = to_scaled_u64(trigger_price, market.price_decimals as u32);
+        let trigger_price_wire = to_scaled_u64(trigger_price, market.price_decimals as u32)?;
         let limit_price_wire = limit_price
-            .map(|lp| to_scaled_u64(lp, market.price_decimals as u32));
+            .map(|lp| to_scaled_u64(lp, market.price_decimals as u32))
+            .transpose()?;
 
         let proto_side: i32 = match side {
             Side::Ask => nord::Side::Ask as i32,
@@ -481,8 +475,7 @@ impl NordUser {
         account_id: Option<u32>,
     ) -> Result<u64> {
         let session_id = self.check_session()?;
-        let acct = account_id
-            .or_else(|| self.default_account_id().ok());
+        let acct = account_id.or_else(|| self.default_account_id().ok());
 
         let proto_side: i32 = match side {
             Side::Ask => nord::Side::Ask as i32,
@@ -524,16 +517,12 @@ impl NordUser {
             .ok_or(NordError::NoAccount)?;
 
         let token = self.nord.find_token(token_id)?;
-        let amount_wire = to_scaled_u64(amount, token.decimals as u32);
+        let amount_wire = to_scaled_u64(amount, token.decimals as u32)?;
 
-        let recipient = to_account_id.map(|id| {
-            nord::action::Recipient {
-                recipient_type: Some(
-                    nord::action::recipient::RecipientType::Owned(
-                        nord::action::recipient::Owned { account_id: id },
-                    ),
-                ),
-            }
+        let recipient = to_account_id.map(|id| nord::action::Recipient {
+            recipient_type: Some(nord::action::recipient::RecipientType::Owned(
+                nord::action::recipient::Owned { account_id: id },
+            )),
         });
 
         let kind = nord::action::Kind::Transfer(nord::action::Transfer {
@@ -569,7 +558,7 @@ impl NordUser {
     ) -> Result<u64> {
         let session_id = self.check_session()?;
         let token = self.nord.find_token(token_id)?;
-        let amount_wire = to_scaled_u64(amount, token.decimals as u32);
+        let amount_wire = to_scaled_u64(amount, token.decimals as u32)?;
 
         let dest = dest_pubkey
             .filter(|s| !s.is_empty())
@@ -601,6 +590,7 @@ impl NordUser {
 
 // Result types for user operations.
 
+/// Result of a place-order action.
 #[derive(Debug)]
 pub struct PlaceOrderResult {
     pub action_id: u64,
@@ -608,6 +598,7 @@ pub struct PlaceOrderResult {
     pub fills: Vec<nord::receipt::Trade>,
 }
 
+/// Result of a cancel-order action.
 #[derive(Debug)]
 pub struct CancelOrderResult {
     pub action_id: u64,
@@ -615,12 +606,14 @@ pub struct CancelOrderResult {
     pub account_id: u32,
 }
 
+/// Result of an atomic (batched) action.
 #[derive(Debug)]
 pub struct AtomicResult {
     pub action_id: u64,
     pub results: Vec<nord::receipt::atomic_subaction_result_kind::Inner>,
 }
 
+/// Result of a token transfer action.
 #[derive(Debug)]
 pub struct TransferResult {
     pub action_id: u64,

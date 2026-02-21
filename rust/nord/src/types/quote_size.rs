@@ -1,5 +1,7 @@
-use rust_decimal::Decimal;
 use rust_decimal::prelude::ToPrimitive;
+use rust_decimal::Decimal;
+
+use crate::error::{NordError, Result};
 
 /// Represents a price+size pair, allowing conversion to wire format.
 #[derive(Debug, Clone)]
@@ -9,6 +11,7 @@ pub struct QuoteSize {
 }
 
 impl QuoteSize {
+    /// Create a new `QuoteSize` from a price and size.
     pub fn new(price: Decimal, size: Decimal) -> Self {
         Self { price, size }
     }
@@ -19,18 +22,22 @@ impl QuoteSize {
     }
 
     /// Convert to wire format scaled integers.
-    pub fn to_wire(&self, price_decimals: u32, size_decimals: u32) -> (u64, u64) {
+    ///
+    /// # Errors
+    ///
+    /// Returns `NordError::Overflow` if the scaled price or size does not fit in a `u64`.
+    pub fn to_wire(&self, price_decimals: u32, size_decimals: u32) -> Result<(u64, u64)> {
         let price_scale = Decimal::from(10u64.pow(price_decimals));
         let size_scale = Decimal::from(10u64.pow(size_decimals));
 
         let price_wire = (self.price * price_scale)
             .to_u64()
-            .expect("price overflow");
+            .ok_or_else(|| NordError::Overflow(format!("price overflow: {}", self.price)))?;
         let size_wire = (self.size * size_scale)
             .to_u64()
-            .expect("size overflow");
+            .ok_or_else(|| NordError::Overflow(format!("size overflow: {}", self.size)))?;
 
-        (price_wire, size_wire)
+        Ok((price_wire, size_wire))
     }
 }
 
@@ -67,7 +74,7 @@ mod tests {
     fn test_to_wire_btc_like() {
         // BTC-like market: price_decimals=2, size_decimals=4
         let qs = QuoteSize::new(dec!(50000.50), dec!(0.1234));
-        let (price_wire, size_wire) = qs.to_wire(2, 4);
+        let (price_wire, size_wire) = qs.to_wire(2, 4).unwrap();
         // 50000.50 * 100 = 5_000_050
         assert_eq!(price_wire, 5_000_050);
         // 0.1234 * 10000 = 1234
@@ -77,7 +84,7 @@ mod tests {
     #[test]
     fn test_to_wire_whole_numbers() {
         let qs = QuoteSize::new(dec!(100), dec!(10));
-        let (price_wire, size_wire) = qs.to_wire(0, 0);
+        let (price_wire, size_wire) = qs.to_wire(0, 0).unwrap();
         assert_eq!(price_wire, 100);
         assert_eq!(size_wire, 10);
     }
@@ -86,7 +93,7 @@ mod tests {
     fn test_to_wire_high_decimals() {
         // 6 price decimals, 6 size decimals
         let qs = QuoteSize::new(dec!(1.123456), dec!(2.654321));
-        let (price_wire, size_wire) = qs.to_wire(6, 6);
+        let (price_wire, size_wire) = qs.to_wire(6, 6).unwrap();
         assert_eq!(price_wire, 1_123_456);
         assert_eq!(size_wire, 2_654_321);
     }
@@ -94,7 +101,7 @@ mod tests {
     #[test]
     fn test_to_wire_zero() {
         let qs = QuoteSize::new(dec!(0), dec!(0));
-        let (price_wire, size_wire) = qs.to_wire(8, 8);
+        let (price_wire, size_wire) = qs.to_wire(8, 8).unwrap();
         assert_eq!(price_wire, 0);
         assert_eq!(size_wire, 0);
     }

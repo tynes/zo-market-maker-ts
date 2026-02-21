@@ -29,11 +29,7 @@ fn build_url(symbols: &[String]) -> String {
 }
 
 /// Outer reconnection loop. Runs until cancelled.
-pub async fn run_feed(
-    symbols: &[String],
-    json_mode: bool,
-    cancel: CancellationToken,
-) {
+pub async fn run_feed(symbols: &[String], json_mode: bool, cancel: CancellationToken) {
     let url = build_url(symbols);
     info!(url = %url, "starting feed");
 
@@ -128,7 +124,7 @@ async fn run_single_connection(
                         last_message_time = Instant::now();
                     }
                     Some(Err(e)) => {
-                        return Err(FeedError::WebSocket(e));
+                        return Err(FeedError::WebSocket(Box::new(e)));
                     }
                     None => {
                         return Err(FeedError::ConnectionClosed);
@@ -139,7 +135,7 @@ async fn run_single_connection(
             // Branch 2: Ping interval
             _ = ping_interval.tick() => {
                 debug!("sending ping");
-                sink.send(Message::Ping(vec![].into())).await?;
+                sink.send(Message::Ping(vec![])).await?;
                 pong_deadline = Some(Instant::now() + PONG_TIMEOUT);
             }
 

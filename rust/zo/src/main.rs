@@ -60,7 +60,7 @@ async fn main() {
             feed::run_feed(&args.symbols, args.json, cancel).await;
         }
         Command::MarketMaker => {
-            eprintln!("market-maker subcommand is not yet implemented");
+            tracing::error!("market-maker subcommand is not yet implemented");
             std::process::exit(1);
         }
     }

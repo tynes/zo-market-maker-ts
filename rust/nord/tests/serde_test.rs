@@ -735,8 +735,14 @@ fn test_side_serde() {
 
 #[test]
 fn test_fill_role_serde() {
-    assert_eq!(serde_json::to_string(&FillRole::Maker).unwrap(), "\"maker\"");
-    assert_eq!(serde_json::to_string(&FillRole::Taker).unwrap(), "\"taker\"");
+    assert_eq!(
+        serde_json::to_string(&FillRole::Maker).unwrap(),
+        "\"maker\""
+    );
+    assert_eq!(
+        serde_json::to_string(&FillRole::Taker).unwrap(),
+        "\"taker\""
+    );
 }
 
 #[test]

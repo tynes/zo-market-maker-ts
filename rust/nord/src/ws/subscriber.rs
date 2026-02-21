@@ -8,6 +8,7 @@ pub struct OrderbookSubscription {
 }
 
 impl OrderbookSubscription {
+    /// Create a new orderbook subscription from a broadcast receiver.
     pub fn new(rx: broadcast::Receiver<WebSocketDeltaUpdate>) -> Self {
         Self { rx }
     }
@@ -33,10 +34,12 @@ pub struct TradeSubscription {
 }
 
 impl TradeSubscription {
+    /// Create a new trade subscription from a broadcast receiver.
     pub fn new(rx: broadcast::Receiver<WebSocketTradeUpdate>) -> Self {
         Self { rx }
     }
 
+    /// Receive the next update. Returns `None` if the channel is closed.
     pub async fn next(&mut self) -> Option<WebSocketTradeUpdate> {
         loop {
             match self.rx.recv().await {
@@ -57,10 +60,12 @@ pub struct AccountSubscription {
 }
 
 impl AccountSubscription {
+    /// Create a new account subscription from a broadcast receiver.
     pub fn new(rx: broadcast::Receiver<WebSocketAccountUpdate>) -> Self {
         Self { rx }
     }
 
+    /// Receive the next update. Returns `None` if the channel is closed.
     pub async fn next(&mut self) -> Option<WebSocketAccountUpdate> {
         loop {
             match self.rx.recv().await {
@@ -81,10 +86,12 @@ pub struct CandleSubscription {
 }
 
 impl CandleSubscription {
+    /// Create a new candle subscription from a broadcast receiver.
     pub fn new(rx: broadcast::Receiver<WebSocketCandleUpdate>) -> Self {
         Self { rx }
     }
 
+    /// Receive the next update. Returns `None` if the channel is closed.
     pub async fn next(&mut self) -> Option<WebSocketCandleUpdate> {
         loop {
             match self.rx.recv().await {

@@ -29,10 +29,7 @@ impl NordHttpClient {
     pub async fn get_actions(&self, from: u64, to: u64) -> Result<Vec<ActionsItem>> {
         self.get(
             "/action",
-            &[
-                ("from", &from.to_string()),
-                ("to", &to.to_string()),
-            ],
+            &[("from", &from.to_string()), ("to", &to.to_string())],
         )
         .await
     }
@@ -53,7 +50,8 @@ impl NordHttpClient {
 
     /// GET /account/{account_id}/pubkey - Account public key.
     pub async fn get_account_pubkey(&self, account_id: u32) -> Result<String> {
-        self.get(&format!("/account/{account_id}/pubkey"), &[]).await
+        self.get(&format!("/account/{account_id}/pubkey"), &[])
+            .await
     }
 
     /// GET /account/{account_id}/fees/withdrawal - Withdrawal fee for account.
@@ -155,10 +153,7 @@ impl NordHttpClient {
     }
 
     /// GET /account/{account_id}/triggers - Active triggers.
-    pub async fn get_account_triggers(
-        &self,
-        account_id: u32,
-    ) -> Result<Option<Vec<TriggerInfo>>> {
+    pub async fn get_account_triggers(&self, account_id: u32) -> Result<Option<Vec<TriggerInfo>>> {
         self.get(&format!("/account/{account_id}/triggers"), &[])
             .await
     }
@@ -189,11 +184,8 @@ impl NordHttpClient {
             ps_str = ps.to_string();
             query.push(("pageSize", ps_str.as_str()));
         }
-        self.get(
-            &format!("/account/{account_id}/triggers/history"),
-            &query,
-        )
-        .await
+        self.get(&format!("/account/{account_id}/triggers/history"), &query)
+            .await
     }
 
     /// GET /account/{account_id}/history/withdrawal - Withdrawal history.
@@ -222,11 +214,8 @@ impl NordHttpClient {
             ps_str = ps.to_string();
             query.push(("pageSize", ps_str.as_str()));
         }
-        self.get(
-            &format!("/account/{account_id}/history/withdrawal"),
-            &query,
-        )
-        .await
+        self.get(&format!("/account/{account_id}/history/withdrawal"), &query)
+            .await
     }
 
     /// GET /account/{account_id}/history/deposit - Deposit history.
@@ -255,11 +244,8 @@ impl NordHttpClient {
             ps_str = ps.to_string();
             query.push(("pageSize", ps_str.as_str()));
         }
-        self.get(
-            &format!("/account/{account_id}/history/deposit"),
-            &query,
-        )
-        .await
+        self.get(&format!("/account/{account_id}/history/deposit"), &query)
+            .await
     }
 
     /// GET /account/{account_id}/history/liquidation - Liquidation history.

@@ -89,8 +89,8 @@ fn write_u64(buf: &mut [u8; 20], mut val: u64) -> &str {
         buf[i] = b'0' + (val % 10) as u8;
         val /= 10;
     }
-    // SAFETY: digits 0-9 are valid UTF-8
-    unsafe { std::str::from_utf8_unchecked(&buf[i..]) }
+    // Digits 0-9 are always valid single-byte UTF-8, so this cannot fail.
+    std::str::from_utf8(&buf[i..]).expect("digits 0-9 are valid UTF-8")
 }
 
 impl From<std::io::Error> for FeedError {

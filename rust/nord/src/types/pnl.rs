@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Profit-and-loss information for an account in a specific market.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountPnlInfo {

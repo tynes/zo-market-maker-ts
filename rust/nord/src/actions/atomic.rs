@@ -4,7 +4,7 @@ use crate::error::{NordError, Result};
 use crate::proto::nord;
 use crate::rest::NordHttpClient;
 use crate::types::{FillMode, QuoteSize, Side};
-use crate::utils::{to_scaled_u64, to_scaled_u128};
+use crate::utils::{to_scaled_u128, to_scaled_u64};
 
 use super::{create_action, send_action, SignFn};
 
@@ -66,7 +66,7 @@ pub fn build_atomic_subactions(
                 client_order_id,
             } => {
                 let (wire_price, wire_size) = if let Some(qs) = quote_size {
-                    qs.to_wire(*price_decimals as u32, *size_decimals as u32)
+                    qs.to_wire(*price_decimals as u32, *size_decimals as u32)?
                 } else {
                     let p = price.ok_or_else(|| {
                         NordError::Validation("place action requires price or quote_size".into())
@@ -75,8 +75,8 @@ pub fn build_atomic_subactions(
                         NordError::Validation("place action requires size or quote_size".into())
                     })?;
                     (
-                        to_scaled_u64(p, *price_decimals as u32),
-                        to_scaled_u64(s, *size_decimals as u32),
+                        to_scaled_u64(p, *price_decimals as u32)?,
+                        to_scaled_u64(s, *size_decimals as u32)?,
                     )
                 };
 
@@ -86,16 +86,19 @@ pub fn build_atomic_subactions(
                 };
                 let proto_fill_mode: i32 = fill_mode.to_proto() as i32;
 
-                let proto_quote_size = quote_size.as_ref().map(|qs| {
-                    let val = to_scaled_u128(
-                        qs.value(),
-                        (*price_decimals as u32) + (*size_decimals as u32),
-                    );
-                    nord::U128 {
-                        lo: val as u64,
-                        hi: (val >> 64) as u64,
-                    }
-                });
+                let proto_quote_size = quote_size
+                    .as_ref()
+                    .map(|qs| {
+                        let val = to_scaled_u128(
+                            qs.value(),
+                            (*price_decimals as u32) + (*size_decimals as u32),
+                        )?;
+                        Ok::<_, NordError>(nord::U128 {
+                            lo: val as u64,
+                            hi: (val >> 64) as u64,
+                        })
+                    })
+                    .transpose()?;
 
                 Ok(nord::AtomicSubactionKind {
                     inner: Some(nord::atomic_subaction_kind::Inner::TradeOrPlace(
@@ -150,11 +153,8 @@ pub async fn atomic(
 
     match receipt.kind {
         Some(nord::receipt::Kind::Atomic(r)) => {
-            let results: Vec<nord::receipt::atomic_subaction_result_kind::Inner> = r
-                .results
-                .into_iter()
-                .filter_map(|r| r.inner)
-                .collect();
+            let results: Vec<nord::receipt::atomic_subaction_result_kind::Inner> =
+                r.results.into_iter().filter_map(|r| r.inner).collect();
             Ok((receipt.action_id, results))
         }
         Some(nord::receipt::Kind::Err(code)) => Err(NordError::ReceiptError(format!(
@@ -319,8 +319,8 @@ mod tests {
             size_decimals: 4,
             price_decimals: 2,
             size: Some(dec!(1.0)),
-            price: None,        // missing
-            quote_size: None,   // also missing
+            price: None,      // missing
+            quote_size: None, // also missing
             client_order_id: None,
         }];
         let err = build_atomic_subactions(&actions).unwrap_err();
@@ -336,7 +336,7 @@ mod tests {
             is_reduce_only: false,
             size_decimals: 4,
             price_decimals: 2,
-            size: None,            // missing
+            size: None, // missing
             price: Some(dec!(100)),
             quote_size: None,
             client_order_id: None,

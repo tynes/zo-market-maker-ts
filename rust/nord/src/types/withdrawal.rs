@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// Record of a token withdrawal from the exchange.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WithdrawalInfo {

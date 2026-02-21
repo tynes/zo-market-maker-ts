@@ -7,10 +7,7 @@ use crate::error::NordError;
 
 /// Sign a payload by hex-encoding it first, then signing the hex string.
 /// This matches the `user_sign(x) => ed25519_sign(hex(x))` scheme.
-pub async fn sign_hex_encoded_payload(
-    payload: &[u8],
-    signing_key: &SigningKey,
-) -> Result<Vec<u8>> {
+pub async fn sign_hex_encoded_payload(payload: &[u8], signing_key: &SigningKey) -> Result<Vec<u8>> {
     let hex_encoded = hex::encode(payload);
     let signature = signing_key.sign(hex_encoded.as_bytes());
     Ok(signature.to_bytes().to_vec())
@@ -18,10 +15,7 @@ pub async fn sign_hex_encoded_payload(
 
 /// Sign a payload directly (used for session-based signing).
 /// This matches the `session_sign(x) => ed25519_sign(x)` scheme.
-pub async fn sign_raw_payload(
-    payload: &[u8],
-    signing_key: &SigningKey,
-) -> Result<Vec<u8>> {
+pub async fn sign_raw_payload(payload: &[u8], signing_key: &SigningKey) -> Result<Vec<u8>> {
     let signature = signing_key.sign(payload);
     Ok(signature.to_bytes().to_vec())
 }
@@ -46,10 +40,9 @@ pub async fn sign_solana_transaction_framed_payload(
     use solana_sdk::signer::Signer as _;
     use solana_sdk::transaction::Transaction;
 
-    let memo_program_id =
-        "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
-            .parse::<Pubkey>()
-            .map_err(|e| NordError::Signing(format!("invalid memo program id: {e}")))?;
+    let memo_program_id = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+        .parse::<Pubkey>()
+        .map_err(|e| NordError::Signing(format!("invalid memo program id: {e}")))?;
 
     let user_pk = Pubkey::new_from_array(*user_pubkey);
 
@@ -73,9 +66,10 @@ pub async fn sign_solana_transaction_framed_payload(
     let mut tx = Transaction::new_unsigned(message);
     tx.sign(&[&keypair], solana_sdk::hash::Hash::default());
 
-    let sig = tx.signatures.first().ok_or_else(|| {
-        NordError::Signing("no signature in transaction".into())
-    })?;
+    let sig = tx
+        .signatures
+        .first()
+        .ok_or_else(|| NordError::Signing("no signature in transaction".into()))?;
 
     Ok(sig.as_ref().to_vec())
 }

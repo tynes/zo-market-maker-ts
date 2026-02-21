@@ -9,9 +9,9 @@ use ed25519_dalek::{SigningKey, Verifier};
 fn test_signing_key() -> SigningKey {
     // A fixed 32-byte secret for reproducible tests.
     let secret: [u8; 32] = [
-        0x9d, 0x61, 0xb1, 0x9d, 0xef, 0xfd, 0x5a, 0x60, 0xba, 0x84, 0x4a, 0xf4, 0x92, 0xec,
-        0x2c, 0xc4, 0x44, 0x49, 0xc5, 0x69, 0x7b, 0x32, 0x69, 0x19, 0x70, 0x3b, 0xac, 0x03,
-        0x1c, 0xae, 0x7f, 0x60,
+        0x9d, 0x61, 0xb1, 0x9d, 0xef, 0xfd, 0x5a, 0x60, 0xba, 0x84, 0x4a, 0xf4, 0x92, 0xec, 0x2c,
+        0xc4, 0x44, 0x49, 0xc5, 0x69, 0x7b, 0x32, 0x69, 0x19, 0x70, 0x3b, 0xac, 0x03, 0x1c, 0xae,
+        0x7f, 0x60,
     ];
     SigningKey::from_bytes(&secret)
 }
@@ -59,9 +59,7 @@ async fn test_sign_hex_encoded_verifies() {
         .await
         .unwrap();
 
-    let signature = ed25519_dalek::Signature::from_bytes(
-        sig_bytes.as_slice().try_into().unwrap(),
-    );
+    let signature = ed25519_dalek::Signature::from_bytes(sig_bytes.as_slice().try_into().unwrap());
 
     // The hex-encoded scheme signs the hex encoding of the payload
     let hex_encoded = hex::encode(payload);
@@ -80,9 +78,7 @@ async fn test_sign_raw_verifies() {
         .await
         .unwrap();
 
-    let signature = ed25519_dalek::Signature::from_bytes(
-        sig_bytes.as_slice().try_into().unwrap(),
-    );
+    let signature = ed25519_dalek::Signature::from_bytes(sig_bytes.as_slice().try_into().unwrap());
 
     // Raw signing signs the payload bytes directly
     verifying_key
@@ -192,9 +188,7 @@ async fn test_prepare_action_round_trip() {
     let sign_fn: Box<nord::actions::SignFn> = Box::new(move |payload: &[u8]| {
         let key = key.clone();
         let payload = payload.to_vec();
-        Box::pin(async move {
-            nord::actions::signing::sign_raw_payload(&payload, &key).await
-        })
+        Box::pin(async move { nord::actions::signing::sign_raw_payload(&payload, &key).await })
     });
 
     let prepared = prepare_action(&action, &sign_fn).await.unwrap();
