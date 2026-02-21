@@ -8,6 +8,7 @@
     "build": "tsc",
     "bot": "node --import tsx src/cli/bot.ts",
     "monitor": "node --import tsx src/cli/monitor.ts",
+    "prices": "node --import tsx src/cli/prices.ts",
     "check": "biome check src",
     "format": "biome format --write src",
     "lint": "biome lint src"
