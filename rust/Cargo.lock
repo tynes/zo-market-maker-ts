@@ -62,24 +62,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "binance-feed"
-version = "0.1.0"
-dependencies = [
- "clap",
- "futures-util",
- "rustls",
- "ryu",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
- "tokio-tungstenite",
- "tokio-util",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "bitflags"
 version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1143,3 +1125,21 @@ name = "zmij"
 version = "1.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa"
+
+[[package]]
+name = "zo"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "futures-util",
+ "rustls",
+ "ryu",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-tungstenite",
+ "tokio-util",
+ "tracing",
+ "tracing-subscriber",
+]

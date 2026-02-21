@@ -1,10 +1,11 @@
 [package]
-name = "binance-feed"
+name = "zo"
 version = "0.1.0"
 edition = "2021"
+default-run = "zo"
 
 [[bin]]
-name = "binance-feed"
+name = "zo"
 path = "src/main.rs"
 
 [dependencies]

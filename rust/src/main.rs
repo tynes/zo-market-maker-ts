@@ -5,6 +5,7 @@ mod output;
 mod types;
 
 use clap::Parser;
+use cli::Command;
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
@@ -14,10 +15,10 @@ async fn main() {
         .install_default()
         .expect("failed to install rustls crypto provider");
 
-    let args = cli::Args::parse();
+    let cli = cli::Cli::parse();
 
     // Initialize tracing
-    let filter = args
+    let filter = cli
         .log_level
         .parse::<tracing_subscriber::filter::LevelFilter>()
         .unwrap_or(tracing_subscriber::filter::LevelFilter::INFO);
@@ -28,31 +29,39 @@ async fn main() {
         .with_writer(std::io::stderr)
         .init();
 
-    info!(symbols = ?args.symbols, json = args.json, "binance-feed starting");
+    match cli.command {
+        Command::Feed(args) => {
+            info!(symbols = ?args.symbols, json = args.json, "feed starting");
 
-    let cancel = CancellationToken::new();
+            let cancel = CancellationToken::new();
 
-    // Signal handler
-    let cancel_clone = cancel.clone();
-    tokio::spawn(async move {
-        let _ = tokio::signal::ctrl_c().await;
-        info!("received SIGINT, shutting down");
-        cancel_clone.cancel();
-    });
+            // Signal handler
+            let cancel_clone = cancel.clone();
+            tokio::spawn(async move {
+                let _ = tokio::signal::ctrl_c().await;
+                info!("received SIGINT, shutting down");
+                cancel_clone.cancel();
+            });
 
-    // Also handle SIGTERM on unix
-    #[cfg(unix)]
-    {
-        let cancel_clone = cancel.clone();
-        tokio::spawn(async move {
-            let mut sig =
-                tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-                    .expect("failed to register SIGTERM handler");
-            sig.recv().await;
-            info!("received SIGTERM, shutting down");
-            cancel_clone.cancel();
-        });
+            // Also handle SIGTERM on unix
+            #[cfg(unix)]
+            {
+                let cancel_clone = cancel.clone();
+                tokio::spawn(async move {
+                    let mut sig =
+                        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+                            .expect("failed to register SIGTERM handler");
+                    sig.recv().await;
+                    info!("received SIGTERM, shutting down");
+                    cancel_clone.cancel();
+                });
+            }
+
+            feed::run_feed(&args.symbols, args.json, cancel).await;
+        }
+        Command::MarketMaker => {
+            eprintln!("market-maker subcommand is not yet implemented");
+            std::process::exit(1);
+        }
     }
-
-    feed::run_feed(&args.symbols, args.json, cancel).await;
 }
