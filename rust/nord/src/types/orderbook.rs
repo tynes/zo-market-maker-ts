@@ -1,0 +1,19 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OrderbookInfo {
+    pub update_id: u64,
+    /// Each entry is `[price, size]`.
+    pub asks: Vec<[f64; 2]>,
+    /// Each entry is `[price, size]`.
+    pub bids: Vec<[f64; 2]>,
+    pub asks_summary: SideSummary,
+    pub bids_summary: SideSummary,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SideSummary {
+    pub sum: f64,
+    pub count: u32,
+}

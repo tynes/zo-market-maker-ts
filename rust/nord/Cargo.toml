@@ -1,0 +1,49 @@
+[package]
+name = "nord"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = []
+solana = ["dep:solana-sdk", "dep:solana-client", "dep:spl-token", "dep:spl-associated-token-account"]
+
+[dependencies]
+# Async/IO
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+tokio-tungstenite = { version = "0.24", features = ["rustls-tls-webpki-roots"] }
+rustls = { version = "0.23", features = ["ring"], default-features = false }
+futures-util = "0.3"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+prost = "0.13"
+
+# Crypto
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+rand = "0.8"
+bs58 = "0.5"
+hex = "0.4"
+
+# Solana (feature-gated)
+solana-sdk = { version = "2", optional = true }
+solana-client = { version = "2", optional = true }
+spl-token = { version = "7", optional = true }
+spl-associated-token-account = { version = "6", optional = true }
+
+# Util
+rust_decimal = { version = "1", features = ["serde-with-str"] }
+thiserror = "2"
+tracing = "0.1"
+url = "2"
+chrono = { version = "0.4", features = ["serde"] }
+tokio-util = "0.7"
+
+[build-dependencies]
+prost-build = "0.13"
+
+[dev-dependencies]
+wiremock = "0.6"
+tokio = { version = "1", features = ["test-util", "macros"] }
+rust_decimal_macros = "1"
