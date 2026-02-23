@@ -33,6 +33,7 @@ spl-token = { version = "7", optional = true }
 spl-associated-token-account = { version = "6", optional = true }
 
 # Util
+ordered-float = "4"
 rust_decimal = { version = "1", features = ["serde-with-str"] }
 thiserror = "2"
 tracing = "0.1"

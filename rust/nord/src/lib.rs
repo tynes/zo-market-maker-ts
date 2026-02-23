@@ -3,6 +3,7 @@ pub mod admin;
 pub mod client;
 pub mod config;
 pub mod error;
+pub mod orderbook;
 pub mod proto;
 pub mod rest;
 pub mod types;
@@ -37,8 +38,11 @@ pub use types::{MarketInfo, MarketsInfo, TokenInfo};
 // Account types
 pub use types::{Account, AccountMarginsView, Balance, OpenOrder, PerpPosition, PositionSummary};
 
-// Orderbook
+// Orderbook (REST snapshot types)
 pub use types::{OrderbookInfo, SideSummary};
+
+// Orderbook (live stream)
+pub use orderbook::{MidPrice, OrderbookDepth, OrderbookSide, OrderbookStream, BBO};
 
 // Trade + order history
 pub use types::{OrderInfo, Trade};
