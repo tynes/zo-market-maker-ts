@@ -1,3 +1,4 @@
+pub mod account;
 pub mod actions;
 pub mod admin;
 pub mod client;
@@ -43,6 +44,9 @@ pub use types::{OrderbookInfo, SideSummary};
 
 // Orderbook (live stream)
 pub use orderbook::{MidPrice, OrderbookDepth, OrderbookSide, OrderbookStream, BBO};
+
+// Account (live stream)
+pub use account::{AccountStream, FillEvent, TrackedOrder};
 
 // Trade + order history
 pub use types::{OrderInfo, Trade};

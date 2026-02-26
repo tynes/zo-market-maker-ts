@@ -1,3 +1,4 @@
+use rust_decimal::Decimal;
 use serde::Deserialize;
 
 /// Binance combined stream envelope: `{"stream":"btcusdt@bookTicker","data":{...}}`
@@ -37,4 +38,12 @@ pub struct BookTickerMsg {
     pub a: String,
     #[serde(rename = "A")]
     pub ask_qty: String,
+}
+
+/// A quote for order placement with side, price, and size.
+#[derive(Debug, Clone)]
+pub struct Quote {
+    pub side: nord::Side,
+    pub price: Decimal,
+    pub size: Decimal,
 }

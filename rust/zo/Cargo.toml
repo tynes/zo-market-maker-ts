@@ -9,6 +9,7 @@ name = "zo"
 path = "src/main.rs"
 
 [dependencies]
+nord = { path = "../nord" }
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = { version = "0.24", features = ["rustls-tls-webpki-roots"] }
 rustls = { version = "0.23", features = ["ring"], default-features = false }
@@ -21,6 +22,12 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 thiserror = "2"
 ryu = "1"
+rust_decimal = { version = "1", features = ["serde-with-str"] }
+rust_decimal_macros = "1"
+dotenvy = "0.15"
+ordered-float = "4"
+ratatui = "0.29"
+crossterm = "0.28"
 
 [profile.release]
 opt-level = 3

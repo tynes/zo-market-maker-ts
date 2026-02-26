@@ -1,17 +1,17 @@
 use std::io::Write;
 
-use crate::error::FeedError;
+use crate::error::ZoError;
 use crate::types::CombinedStreamMsg;
 
 /// Parse a raw JSON text message and write formatted output to the writer.
 ///
-/// Returns `Ok(())` on success, or a `FeedError` if parsing fails.
+/// Returns `Ok(())` on success, or a `ZoError` if parsing fails.
 pub fn handle_message<W: Write>(
     text: &str,
     json_mode: bool,
     buf: &mut String,
     writer: &mut W,
-) -> Result<(), FeedError> {
+) -> Result<(), ZoError> {
     let msg: CombinedStreamMsg = serde_json::from_str(text)?;
     let d = &msg.data;
 
@@ -91,12 +91,4 @@ fn write_u64(buf: &mut [u8; 20], mut val: u64) -> &str {
     }
     // Digits 0-9 are always valid single-byte UTF-8, so this cannot fail.
     std::str::from_utf8(&buf[i..]).expect("digits 0-9 are valid UTF-8")
-}
-
-impl From<std::io::Error> for FeedError {
-    fn from(e: std::io::Error) -> Self {
-        // Map IO errors (stdout broken pipe, etc.) to ConnectionClosed
-        tracing::debug!("IO error: {}", e);
-        FeedError::ConnectionClosed
-    }
 }
